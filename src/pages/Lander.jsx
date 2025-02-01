@@ -66,7 +66,7 @@ const Lander = () => {
           <div className="hidden md:block w-px bg-white h-16 mx-6 text-sky-500"></div>
           <div className="text-center md:w-1/3">
             <h3 className="text-lg font-semibold text-sky-500">Send Us a Message</h3>
-            <p>Contact@HydraVTech.com</p>
+            <p>Contactdsec@HydraVTech.com</p>
           </div>
         </div>
       </footer>
