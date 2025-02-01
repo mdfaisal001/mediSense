@@ -14,7 +14,7 @@ const Lander = () => {
   };
 
   const handleGetStarted = () => {
-    console.log("Get Started button clicked");
+    console.log("Get Started clicked");
     window.location.href = "/login";
   };
 
