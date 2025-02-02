@@ -7,59 +7,111 @@ const symptomsList = Object.keys(symptomsData);
 
 const fuse = new Fuse(symptomsList, {
   includeScore: true,
-  threshold: 0.6,
+  threshold: 0.8,
   ignoreLocation: true,
   minMatchCharLength: 1,
   distance: 100
 });
 
-// Added conversation patterns from code 2
 const conversationPatterns = {
   greetings: {
     patterns: [
-      /\b(hi|hello|hey|good morning|good afternoon|good evening|morning|evening)\b/i,
-      /\b(how are you|how r u|how's it going|what's up|wassup|sup)\b/i,
-      /\b(thanks|thank you|thx|ty)\b/i,
-      /\b(bye|goodbye|see you|cya)\b/i
+      /\b(hi|hello|hey|good morning|good afternoon|good evening|morning|evening|howdy|yo|hiya|greetings|what's up|sup|wassup|hola|namaste|salutations)\b/i,
+      /\b(how are you|how r u|how's it going|what's up|wassup|sup|how have you been|how’s life|how you doing|how’s your day)\b/i,
+      /\b(thanks|thank you|thx|ty|appreciate it|much obliged|cheers|gracias|thankful|thanks a lot|big thanks|many thanks)\b/i,
+      /\b(bye|goodbye|see you|cya|tq|take care|farewell|later|peace out|adios|see ya|catch you later|so long)\b/i
     ],
     responses: {
       greet: [
         "Hello! 👋 How can I help you today?",
-        "Hi there! 😊 How are you feeling?",
-        "Hey! What brings you here today?"
+        "Hi there! 😊 What brings you here?",
+        "Hey! Hope you're having a fantastic day!",
+        "Howdy! Need any assistance?",
+        "Yo! What's up? 👋",
+        "Greetings! How can I be of service?",
+        "Namaste! How’s your day going?",
+        "Hola! How can I assist you today?",
+        "Salutations! How may I help?",
+        "Good to see you! What’s on your mind?"
       ],
       howAreYou: [
-        "I'm doing well, thank you! How are you feeling today?",
-        "I'm here to help! What can I do for you?",
-        "Thanks for asking! How can I assist you today?"
+        "I'm doing well, thank you! How about you?",
+        "I'm here to help! Let me know what you need.",
+        "I'm feeling great! Hope you are too! 😊",
+        "All good on my side! What can I assist you with?",
+        "Thanks for asking! How’s your day going?",
+        "Feeling fantastic! Always ready to help!",
+        "I’m doing great! Anything on your mind?",
+        "Couldn’t be better! What’s up with you?",
+        "Happy and ready to assist! Need anything?",
+        "I’m great! How about you?"
       ],
       thanks: [
-        "You're welcome! 🌟 Is there anything else you need help with?",
-        "Happy to help! Let me know if you need anything else.",
-        "Anytime! Take care of yourself! 😊"
+        "You're welcome! 🌟 Need anything else?",
+        "Happy to help! Let me know if you have more questions.",
+        "Anytime! Stay awesome! 😊",
+        "My pleasure! Take care!",
+        "No problem at all! Hope that helped!",
+        "Always happy to assist! Got more questions?",
+        "You got it! Let me know if you need more help!",
+        "Glad I could help! Anything else?",
+        "I appreciate that! Let me know if you need anything else.",
+        "No worries! Wishing you a great day!"
       ],
       goodbye: [
-        "Take care! 👋 Don't hesitate to come back if you need more help.",
-        "Goodbye! Stay healthy! 👋",
-        "See you later! Take good care of yourself! 🌟"
+        "Take care! 👋 Come back if you need anything!",
+        "Goodbye! Stay safe and well! 👋",
+        "See you later! Keep smiling! 😊",
+        "Farewell! Hope to chat again soon!",
+        "Later! Have a great rest of your day! 🌟",
+        "So long! Wishing you the best!",
+        "Take care and stay awesome!",
+        "Adios! Catch you next time!",
+        "Bye for now! Stay happy and healthy!",
+        "Peace out! See you soon!"
       ]
     }
   },
   commonPhrases: {
     patterns: {
-      "not feeling well": ["headache", "fever", "fatigue"],
-      "under the weather": ["fever", "cold"],
-      "feeling blue": ["fatigue", "depression"],
-      "stomach acting up": ["stomach pain", "nausea"],
-      "cant sleep": ["insomnia"],
-      "feeling down": ["depression", "fatigue"],
-      "head is killing me": ["headache"],
-      "stuffed up": ["runny nose", "cold"],
-      "feeling sick": ["nausea", "fever"],
-      "everything hurts": ["joint pain", "fatigue"]
+      "not feeling well": ["headache", "fever", "fatigue", "body ache", "dizziness"],
+      "under the weather": ["fever", "cold", "congestion", "sore throat"],
+      "feeling blue": ["fatigue", "depression", "anxiety", "low energy", "lack of motivation"],
+      "stomach acting up": ["stomach pain", "nausea", "bloating", "indigestion", "cramps"],
+      "can't sleep": ["insomnia", "restlessness", "stress", "racing thoughts", "sleep deprivation"],
+      "feeling down": ["depression", "fatigue", "low motivation", "anxiety", "hopelessness"],
+      "head is killing me": ["headache", "migraine", "tension", "sinus pressure", "stress headache"],
+      "stuffed up": ["runny nose", "cold", "sinus congestion", "allergies", "blocked sinuses"],
+      "feeling sick": ["nausea", "fever", "chills", "body ache", "flu symptoms"],
+      "everything hurts": ["joint pain", "fatigue", "flu symptoms", "muscle soreness", "inflammation"],
+      "burning up": ["high fever", "chills", "sweating", "hot flashes", "dehydration"],
+      "sore all over": ["muscle pain", "body ache", "flu symptoms", "fatigue", "inflammation"],
+      "shaky and weak": ["low blood sugar", "dehydration", "fatigue", "anxiety", "lack of nutrients"],
+      "dizzy and lightheaded": ["low blood pressure", "dehydration", "vertigo", "fatigue", "inner ear issue"],
+      "can't stop coughing": ["persistent cough", "bronchitis", "chest congestion", "cold", "throat irritation"],
+      "throat is killing me": ["sore throat", "strep throat", "dry throat", "irritation", "tonsillitis"],
+      "nauseous and queasy": ["stomach flu", "motion sickness", "food poisoning", "acid reflux", "pregnancy nausea"],
+      "body feels heavy": ["fatigue", "exhaustion", "muscle weakness", "stress", "lack of sleep"],
+      "my legs feel weak": ["circulation issues", "dehydration", "overexertion", "nerve problems"],
+      "chest feels tight": ["anxiety", "asthma", "respiratory infection", "heartburn", "panic attack"],
+      "can't focus": ["brain fog", "stress", "lack of sleep", "anxiety", "dehydration"],
+      "my heart is racing": ["anxiety", "panic attack", "high caffeine intake", "overexertion"],
+      "feeling jittery": ["high caffeine", "stress", "nervousness", "low blood sugar"],
+      "skin feels itchy": ["allergies", "dry skin", "rash", "eczema", "insect bite"],
+      "eyes are burning": ["dry eyes", "allergies", "eye strain", "fatigue", "lack of sleep"],
+      "back is killing me": ["back pain", "muscle strain", "poor posture", "spinal issues"],
+      "joints are stiff": ["arthritis", "inflammation", "lack of movement", "cold weather"],
+      "feeling restless": ["anxiety", "stress", "hyperactivity", "insomnia"],
+      "feeling weak": ["anemia", "malnutrition", "dehydration", "overexertion"],
+      "got chills": ["fever", "cold", "flu", "low blood sugar"],
+      "feeling too hot": ["fever", "heatstroke", "overexertion", "dehydration"],
+      "hard to breathe": ["asthma", "panic attack", "allergies", "respiratory infection"],
+      "tummy feels weird": ["indigestion", "gas", "stomach flu", "ulcers"],
+      "feeling overwhelmed": ["stress", "anxiety", "burnout", "mental exhaustion"]
     }
   }
 };
+
 
 const ChatAnalyzer = () => {
   const [messages, setMessages] = useState([]);
