@@ -14,11 +14,8 @@ const Lander = () => {
   };
 
   const handleGetStarted = () => {
-<<<<<<< HEAD
     console.log("Get Started button clicked");
-=======
     console.log("Get Started clicked");
->>>>>>> mdfaisal
     window.location.href = "/login";
   };
 
@@ -27,7 +24,7 @@ const Lander = () => {
       <header className="w-full flex justify-between items-center p-6 max-w-6xl">
         <div className="flex items-center space-x-3">
           <img src={logo}alt="HYDRA Logo" className="h-12 w-20" />
-          <h1 className="text-2xl font-bold">HYDRA</h1>
+          <h1 className="text-2xl font-bold">MediSense</h1>
         </div>
         <div>
           <button onClick={handleLogin} className="bg-purple-700 text-white font-bold px-6 py-3 rounded-full mr-4 hover:scale-105 transition">
@@ -48,7 +45,7 @@ const Lander = () => {
             <button onClick={handleGetStarted} className="bg-purple-700 text-white font-bold px-6 py-3 rounded-full hover:scale-105 transition">
               Get Started
             </button>
-            <span className="text-3xl">&rarr;</span>
+            <span onClick={handleGetStarted} className="text-3xl cursor-pointer">&rarr;</span>
           </div>
         </div>
         <div>
