@@ -5,7 +5,7 @@ import { getFirestore } from 'firebase/firestore';
 
 // Your Firebase configuration (replace with your own Firebase project details)
 const firebaseConfig = {
-  apiKey: "AIzaSyB3eUyJxTarIUJdIerY5956VHFMViwoHDY",
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
   authDomain: "medisense-57089.firebaseapp.com",
   projectId: "medisense-57089",
   storageBucket: "medisense-57089.firebasestorage.app",
