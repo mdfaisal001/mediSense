@@ -24,7 +24,7 @@ const Lander = () => {
       <header className="w-full flex justify-between items-center p-6 max-w-6xl">
         <div className="flex items-center space-x-3">
           <img src={logo}alt="HYDRA Logo" className="h-12 w-20" />
-          <h1 className="text-2xl font-bold">MediSense</h1>
+          <h1 className="text-2xl font-bold">MEDISENSE</h1>
         </div>
         <div>
           <button onClick={handleLogin} className="bg-purple-700 text-white font-bold px-6 py-3 rounded-full mr-4 hover:scale-105 transition">
