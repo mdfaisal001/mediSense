@@ -14,7 +14,11 @@ const Lander = () => {
   };
 
   const handleGetStarted = () => {
+<<<<<<< HEAD
     console.log("Get Started button clicked");
+=======
+    console.log("Get Started clicked");
+>>>>>>> mdfaisal
     window.location.href = "/login";
   };
 
