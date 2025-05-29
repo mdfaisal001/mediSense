@@ -103,8 +103,10 @@ mediSense/
 ## ðŸ‘¥ Collaborators
 
 - [Faisal M D](https://github.com/mdfaisal001)
-- [Suddhasattwa Khan](https://github.com/suddhasattwakhan)
-- [Rudalph](https://github.com/Rudalph)
+-[Sivanesh](https://www.github.com/sivanesh10/ )
+- [Praveen](https://github.com/praveenvedha26)
+- [Mohanan]( https://github.com/Mohananchitra )
+
 
 ---
 
