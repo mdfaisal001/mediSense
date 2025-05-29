@@ -1,70 +1,119 @@
-# Getting Started with Create React App
+# MediSense: AI-Powered Symptom Analyzer Chatbot
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+MediSense is a conversational health assistant designed to help users understand and evaluate their symptoms through a dynamic, chatbot-driven interface. Built with **React.js** and **Tailwind CSS**, MediSense interacts with users, asks relevant follow-up questions based on their inputs, and provides real-time health insights.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## ðŸŒ Live Demo
 
-### `npm start`
+ðŸ‘‰ [Access the Live Application](https://medisense-alpha.vercel.app/) *(Replace with your actual deployed URL if different)*
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+---
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## ðŸš€ Features
 
-### `npm test`
+- ðŸ¤– **Conversational Chatbot Interface**  
+  Engages users in a natural, human-like conversation to understand their symptoms.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- ðŸ“‹ **Dynamic Symptom Collection**  
+  Asks follow-up questions based on input (e.g., duration, severity, accompanying symptoms).
 
-### `npm run build`
+- ðŸ§  **Basic Symptom Analysis**  
+  Uses structured dataset (CSV converted to JSON) to provide potential health insights.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- ðŸ—ƒï¸ **No Paid API Required**  
+  Operates on locally trained data, making it ideal for projects with no API cost.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- ðŸŒ **Responsive Design**  
+  Built with Tailwind CSS to ensure a responsive and user-friendly interface across devices.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+---
 
-### `npm run eject`
+## ðŸ§° Tech Stack
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- **Frontend**: React.js, Tailwind CSS
+- **Backend**: Node.js (if applicable)
+- **Data Handling**: JSON-formatted medical dataset (from CSV)
+- **Deployment**: Vercel (or your preferred hosting platform)
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+---
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## ðŸ—ï¸ Project Structure
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+```
+mediSense/
+â”œâ”€â”€ public/
+â”‚   â””â”€â”€ assets/                 # Static assets like images
+â”œâ”€â”€ src/
+â”‚   â”œâ”€â”€ components/             # Reusable React components
+â”‚   â”œâ”€â”€ pages/                  # Application pages
+â”‚   â”œâ”€â”€ App.js                  # Main application component
+â”‚   â””â”€â”€ index.js                # Entry point
+â”œâ”€â”€ .gitignore
+â”œâ”€â”€ package.json
+â”œâ”€â”€ tailwind.config.js
+â””â”€â”€ README.md
+```
 
-## Learn More
+---
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## ðŸ“¥ Getting Started
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### Prerequisites
 
-### Code Splitting
+- Node.js and npm installed on your machine.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### Installation
 
-### Analyzing the Bundle Size
+1. **Clone the repository:**
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+   ```bash
+   git clone https://github.com/mdfaisal001/mediSense.git
+   cd mediSense
+   ```
 
-### Making a Progressive Web App
+2. **Install dependencies:**
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+   ```bash
+   npm install
+   ```
 
-### Advanced Configuration
+3. **Start the development server:**
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+   ```bash
+   npm start
+   ```
 
-### Deployment
+   The application will run at `http://localhost:3000`.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+---
 
-### `npm run build` fails to minify
+## ðŸ§ª Usage
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+1. **Interact with the Chatbot:**
+   - Open the application in your browser.
+   - Engage with the chatbot by entering your symptoms.
+   - Answer follow-up questions to receive basic health insights.
+
+2. **Data Handling:**
+   - The chatbot uses a preprocessed JSON dataset derived from a CSV file containing symptom-disease mappings.
+
+---
+
+## ðŸ‘¥ Collaborators
+
+- [Faisal M D](https://github.com/mdfaisal001)
+- [Suddhasattwa Khan](https://github.com/suddhasattwakhan)
+- [Rudalph](https://github.com/Rudalph)
+
+---
+
+## ðŸ“„ License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+---
+
+## ðŸ“« Contact
+
+For any inquiries or feedback, please reach out to [your-email@example.com](mailto:your-email@example.com).
