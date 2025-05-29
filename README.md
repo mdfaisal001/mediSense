@@ -102,8 +102,10 @@ mediSense/
 
 ## ðŸ‘¥ Collaborators
 
-- [Faisal M D](https://github.com/mdfaisal001)
--[Sivanesh](https://www.github.com/sivanesh10/ )
+- [Faisal M D](https://github.com/mdfaisal001) 
+
+- [Sivanesh](https://github.com/sivanesh10)
+
 - [Praveen](https://github.com/praveenvedha26)
 - [Mohanan]( https://github.com/Mohananchitra )
 
