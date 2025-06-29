@@ -1,267 +1,81 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Moon, Send, AlertTriangle, Volume2, Mic, MicOff, RotateCcw, X } from 'lucide-react';
-import Fuse from 'fuse.js';
-import symptomsData from './SymptomsData';
+import { Moon, Send, AlertTriangle, Volume2, Mic, MicOff, RotateCcw, X, MessageSquare, Sun, Plus, Trash2, Edit3 } from 'lucide-react';
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const symptomsList = Object.keys(symptomsData);
-
-const fuse = new Fuse(symptomsList, {
-  includeScore: true,
-  threshold: 0.8,
-  ignoreLocation: true,
-  minMatchCharLength: 1,
-  distance: 100
-});
-
-const conversationPatterns = {
-  greetings: {
-    patterns: [
-      /\b(hi|hello|hey|good morning|good afternoon|good evening|morning|evening|howdy|yo|hiya|greetings|what's up|sup|wassup|hola|namaste|salutations)\b/i,
-      /\b(how are you|how r u|how's it going|what's up|wassup|sup|how have you been|how’s life|how you doing|how’s your day)\b/i,
-      /\b(thanks|thank you|thx|ty|appreciate it|much obliged|cheers|gracias|thankful|thanks a lot|big thanks|many thanks)\b/i,
-      /\b(bye|goodbye|see you|cya|tq|take care|farewell|later|peace out|adios|see ya|catch you later|so long)\b/i
-    ],
-    responses: {
-      greet: [
-        "Hello! 👋 How can I help you today?",
-        "Hi there! 😊 What brings you here?",
-        "Hey! Hope you're having a fantastic day!",
-        "Howdy! Need any assistance?",
-        "Yo! What's up? 👋",
-        "Greetings! How can I be of service?",
-        "Namaste! How’s your day going?",
-        "Hola! How can I assist you today?",
-        "Salutations! How may I help?",
-        "Good to see you! What’s on your mind?"
-      ],
-      howAreYou: [
-        "I'm doing well, thank you! How about you?",
-        "I'm here to help! Let me know what you need.",
-        "I'm feeling great! Hope you are too! 😊",
-        "All good on my side! What can I assist you with?",
-        "Thanks for asking! How’s your day going?",
-        "Feeling fantastic! Always ready to help!",
-        "I’m doing great! Anything on your mind?",
-        "Couldn’t be better! What’s up with you?",
-        "Happy and ready to assist! Need anything?",
-        "I’m great! How about you?"
-      ],
-      thanks: [
-        "You're welcome! 🌟 Need anything else?",
-        "Happy to help! Let me know if you have more questions.",
-        "Anytime! Stay awesome! 😊",
-        "My pleasure! Take care!",
-        "No problem at all! Hope that helped!",
-        "Always happy to assist! Got more questions?",
-        "You got it! Let me know if you need more help!",
-        "Glad I could help! Anything else?",
-        "I appreciate that! Let me know if you need anything else.",
-        "No worries! Wishing you a great day!"
-      ],
-      goodbye: [
-        "Take care! 👋 Come back if you need anything!",
-        "Goodbye! Stay safe and well! 👋",
-        "See you later! Keep smiling! 😊",
-        "Farewell! Hope to chat again soon!",
-        "Later! Have a great rest of your day! 🌟",
-        "So long! Wishing you the best!",
-        "Take care and stay awesome!",
-        "Adios! Catch you next time!",
-        "Bye for now! Stay happy and healthy!",
-        "Peace out! See you soon!"
-      ]
-    }
-  },
-  commonPhrases: {
-    patterns: {
-      "not feeling well": ["headache", "fever", "fatigue", "body ache", "dizziness"],
-      "under the weather": ["fever", "cold", "congestion", "sore throat"],
-      "feeling blue": ["fatigue", "depression", "anxiety", "low energy", "lack of motivation"],
-      "stomach acting up": ["stomach pain", "nausea", "bloating", "indigestion", "cramps"],
-      "can't sleep": ["insomnia", "restlessness", "stress", "racing thoughts", "sleep deprivation"],
-      "feeling down": ["depression", "fatigue", "low motivation", "anxiety", "hopelessness"],
-      "head is killing me": ["headache", "migraine", "tension", "sinus pressure", "stress headache"],
-      "stuffed up": ["runny nose", "cold", "sinus congestion", "allergies", "blocked sinuses"],
-      "feeling sick": ["nausea", "fever", "chills", "body ache", "flu symptoms"],
-      "everything hurts": ["joint pain", "fatigue", "flu symptoms", "muscle soreness", "inflammation"],
-      "burning up": ["high fever", "chills", "sweating", "hot flashes", "dehydration"],
-      "sore all over": ["muscle pain", "body ache", "flu symptoms", "fatigue", "inflammation"],
-      "shaky and weak": ["low blood sugar", "dehydration", "fatigue", "anxiety", "lack of nutrients"],
-      "dizzy and lightheaded": ["low blood pressure", "dehydration", "vertigo", "fatigue", "inner ear issue"],
-      "can't stop coughing": ["persistent cough", "bronchitis", "chest congestion", "cold", "throat irritation"],
-      "throat is killing me": ["sore throat", "strep throat", "dry throat", "irritation", "tonsillitis"],
-      "nauseous and queasy": ["stomach flu", "motion sickness", "food poisoning", "acid reflux", "pregnancy nausea"],
-      "body feels heavy": ["fatigue", "exhaustion", "muscle weakness", "stress", "lack of sleep"],
-      "my legs feel weak": ["circulation issues", "dehydration", "overexertion", "nerve problems"],
-      "chest feels tight": ["anxiety", "asthma", "respiratory infection", "heartburn", "panic attack"],
-      "can't focus": ["brain fog", "stress", "lack of sleep", "anxiety", "dehydration"],
-      "my heart is racing": ["anxiety", "panic attack", "high caffeine intake", "overexertion"],
-      "feeling jittery": ["high caffeine", "stress", "nervousness", "low blood sugar"],
-      "skin feels itchy": ["allergies", "dry skin", "rash", "eczema", "insect bite"],
-      "eyes are burning": ["dry eyes", "allergies", "eye strain", "fatigue", "lack of sleep"],
-      "back is killing me": ["back pain", "muscle strain", "poor posture", "spinal issues"],
-      "joints are stiff": ["arthritis", "inflammation", "lack of movement", "cold weather"],
-      "feeling restless": ["anxiety", "stress", "hyperactivity", "insomnia"],
-      "feeling weak": ["anemia", "malnutrition", "dehydration", "overexertion"],
-      "got chills": ["fever", "cold", "flu", "low blood sugar"],
-      "feeling too hot": ["fever", "heatstroke", "overexertion", "dehydration"],
-      "hard to breathe": ["asthma", "panic attack", "allergies", "respiratory infection"],
-      "tummy feels weird": ["indigestion", "gas", "stomach flu", "ulcers"],
-      "feeling overwhelmed": ["stress", "anxiety", "burnout", "mental exhaustion"]
-    }
-  }
-};
-
+// Add your API key here (keep it safe in real projects)
+const genAI = new GoogleGenerativeAI(process.env.REACT_APP_GEMINI_API_KEY);
 
 const ChatAnalyzer = () => {
   const [messages, setMessages] = useState([]);
   const [userInput, setUserInput] = useState('');
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const [isTyping, setIsTyping] = useState(false);
   const [isSpeechEnabled, setIsSpeechEnabled] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [suggestions, setSuggestions] = useState([]);
-  const [suggestionsVisible, setSuggestionsVisible] = useState(false);
+  const [chatHistory, setChatHistory] = useState([]);
+  const [currentChatId, setCurrentChatId] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const messagesEndRef = useRef(null);
   const recognitionRef = useRef(null);
 
-  // Added useEffect for speech recognition initialization from code 2
   useEffect(() => {
     if ('webkitSpeechRecognition' in window) {
-      const initializeSpeechRecognition = () => {
-        recognitionRef.current = new window.webkitSpeechRecognition();
-        recognitionRef.current.continuous = false;
-        recognitionRef.current.interimResults = false;
-        
-        recognitionRef.current.onresult = (event) => {
-          const transcript = event.results[0][0].transcript;
-          setUserInput(transcript);
-          handleSendMessage(transcript);
-        };
+      recognitionRef.current = new window.webkitSpeechRecognition();
+      recognitionRef.current.continuous = false;
+      recognitionRef.current.interimResults = false;
 
-        recognitionRef.current.onerror = (event) => {
-          console.error('Speech recognition error:', event.error);
-          setIsListening(false);
-        };
-
-        recognitionRef.current.onend = () => {
-          setIsListening(false);
-        };
+      recognitionRef.current.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        setUserInput(transcript);
+        handleSendMessage(transcript);
       };
 
-      initializeSpeechRecognition();
+      recognitionRef.current.onerror = () => setIsListening(false);
+      recognitionRef.current.onend = () => setIsListening(false);
     }
   }, []);
 
   useEffect(() => {
-    const welcomeMessage = {
-      type: 'bot',
-      content: "Hello! 👋 I'm your health assistant. I can help you understand your symptoms, but remember I'm not a replacement for professional medical advice. How can I help you today?",
-      time: new Date().toLocaleTimeString(),
-      sender: 'HealthBot'
+    const initialChat = {
+      id: Date.now(),
+      title: "New Chat",
+      messages: [{
+        type: 'bot',
+        content: "Hello! 👋 I'm your health assistant powered by AI. Feel free to describe your symptoms or ask any health-related question!",
+        time: new Date().toLocaleTimeString(),
+        sender: 'Medisense - Your Health Assistant',
+        avatar: '🤖'
+      }],
+      timestamp: new Date()
     };
-    setMessages([welcomeMessage]);
+    
+    setMessages(initialChat.messages);
+    setChatHistory([initialChat]);
+    setCurrentChatId(initialChat.id);
   }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Added handleGreeting function from code 2
-  const handleGreeting = (input) => {
-    const lowerInput = input.toLowerCase();
-    
-    if (conversationPatterns.greetings.patterns[0].test(lowerInput)) {
-      return conversationPatterns.greetings.responses.greet[Math.floor(Math.random() * conversationPatterns.greetings.responses.greet.length)];
-    }
-    if (conversationPatterns.greetings.patterns[1].test(lowerInput)) {
-      return conversationPatterns.greetings.responses.howAreYou[Math.floor(Math.random() * conversationPatterns.greetings.responses.howAreYou.length)];
-    }
-    if (conversationPatterns.greetings.patterns[2].test(lowerInput)) {
-      return conversationPatterns.greetings.responses.thanks[Math.floor(Math.random() * conversationPatterns.greetings.responses.thanks.length)];
-    }
-    if (conversationPatterns.greetings.patterns[3].test(lowerInput)) {
-      return conversationPatterns.greetings.responses.goodbye[Math.floor(Math.random() * conversationPatterns.greetings.responses.goodbye.length)];
-    }
-    return null;
-  };
-
-  // Added getBotResponse function from code 2
-  const getBotResponse = (input) => {
-    // Check for greetings first
-    const greetingResponse = handleGreeting(input);
-    if (greetingResponse) return greetingResponse;
-
-    // Check common phrases
-    const lowerInput = input.toLowerCase();
-    for (const [phrase, symptoms] of Object.entries(conversationPatterns.commonPhrases.patterns)) {
-      if (lowerInput.includes(phrase)) {
-        const responses = symptoms.map(symptom => {
-          const { description, possibleCauses } = symptomsData[symptom];
-          return `Regarding ${symptom}: ${description}\nPossible causes: ${possibleCauses.join(', ')}`;
-        });
-        return responses.join('\n\n');
-      }
-    }
-
-    // Check for specific symptoms
-    const searchResults = fuse.search(input);
-    if (searchResults.length > 0 && searchResults[0].score <= 0.6) {
-      const symptom = searchResults[0].item;
-      const { description, possibleCauses } = symptomsData[symptom];
-      return `Based on your description, it sounds like you're experiencing ${symptom}. ${description}\n\nPossible causes include: ${possibleCauses.join(', ')}.\n\nReminder: Please consult a healthcare professional for proper diagnosis and treatment.`;
-    }
-
-    return "I'm not quite sure what symptoms you're describing. Could you please provide more details? Try describing your symptoms differently or use common terms.";
-  };
-
   const handleInputChange = (e) => {
-    const value = e.target.value;
-    setUserInput(value);
-    
-    // Show suggestions dropdown when typing
-    if (value.length >= 1) {
-      const results = fuse.search(value).slice(0, 5);
-      setSuggestions(results.map(result => result.item));
-      setSuggestionsVisible(true);
-    } else {
-      setSuggestions([]);
-      setSuggestionsVisible(false);
-    }
+    setUserInput(e.target.value);
   };
 
-  const handleSuggestionClick = (suggestion) => {
-    setUserInput(suggestion);
-    setSuggestionsVisible(false);
-    setSuggestions([]);
-  };
+  const simulateAIResponse = async (userMessage) => {
+  try {
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-  const clearChat = () => {
-    setMessages([{
-      type: 'bot',
-      content: "Hello! 👋 I'm your health assistant. I can help you understand your symptoms, but remember I'm not a replacement for professional medical advice. How can I help you today?",
-      time: new Date().toLocaleTimeString(),
-      sender: 'HealthBot'
-    }]);
-    setUserInput('');
-    setSuggestions([]);
-    setSuggestionsVisible(false);
-  };
+    const result = await model.generateContent(userMessage);
+    const response = await result.response;
+    const text = response.text();
 
-  const checkSpelling = (text) => {
-    const words = text.toLowerCase().split(' ');
-    const potentialSymptoms = words.filter(word => word.length > 3);
-    
-    let correctionMessage = '';
-    for (const word of potentialSymptoms) {
-      const results = fuse.search(word);
-      if (results.length > 0 && results[0].score > 0.3 && results[0].score < 0.6) {
-        correctionMessage += `Did you mean "${results[0].item}" instead of "${word}"? `;
-      }
-    }
-    
-    return correctionMessage;
-  };
+    return text;
+  } catch (error) {
+    console.error("Gemini error:", error);
+    return "⚠️ Sorry, I'm having trouble connecting to Gemini right now. Please try again later.";
+  }
+};
 
   const handleSendMessage = async (text) => {
     if (!text.trim()) return;
@@ -270,41 +84,40 @@ const ChatAnalyzer = () => {
       type: 'user',
       content: text,
       time: new Date().toLocaleTimeString(),
-      sender: 'You'
+      sender: 'You',
+      avatar: '👤'
     };
 
-    setMessages(prev => [...prev, newUserMessage]);
+    const updatedMessages = [...messages, newUserMessage];
+    setMessages(updatedMessages);
     setUserInput('');
-    setSuggestions([]);
-    setSuggestionsVisible(false);
     setIsTyping(true);
 
-    // Check for spelling mistakes
-    const spellCheckMessage = checkSpelling(text);
-    
-    // Simulate typing delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
 
-    let botResponse = getBotResponse(text);
-    
-    // Add spelling suggestion if needed
-    if (spellCheckMessage) {
-      botResponse = spellCheckMessage + "\n\n" + botResponse;
-    }
+    // Get AI response
+    const botResponse = await simulateAIResponse(text);
 
     const botMessage = {
       type: 'bot',
       content: botResponse,
       time: new Date().toLocaleTimeString(),
-      sender: 'HealthBot'
+      sender: 'HealthBot',
+      avatar: '🤖'
     };
 
-    setMessages(prev => [...prev, botMessage]);
+    const finalMessages = [...updatedMessages, botMessage];
+    setMessages(finalMessages);
     setIsTyping(false);
 
-    if (isSpeechEnabled) {
-      speak(botResponse);
-    }
+    // Update chat history with bot response
+    const finalHistory = chatHistory.map(chat => 
+      chat.id === currentChatId 
+        ? { ...chat, messages: finalMessages }
+        : chat
+    );
+    setChatHistory(finalHistory);
+
+    if (isSpeechEnabled) speak(botResponse);
   };
 
   const toggleVoiceInput = () => {
@@ -322,125 +135,300 @@ const ChatAnalyzer = () => {
     }
   };
 
-  // Added speak function from code 2
   const speak = (text) => {
     if (isSpeechEnabled && window.speechSynthesis) {
-      const utterance = new SpeechSynthesisUtterance(text);
+      const utterance = new SpeechSynthesisUtterance(text.replace(/[*•]/g, ''));
+      utterance.rate = 0.9;
+      utterance.pitch = 1;
       window.speechSynthesis.speak(utterance);
     }
   };
 
+
+
+  const loadChat = (chatId) => {
+    const chat = chatHistory.find(c => c.id === chatId);
+    if (chat) {
+      setMessages(chat.messages);
+      setCurrentChatId(chatId);
+      setSidebarOpen(false);
+    }
+  };
+
+  
+
+  const formatMessageContent = (content) => {
+    return content
+      .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-blue-600 dark:text-blue-400">$1</strong>')
+      .replace(/• (.*?)(?=\n|$)/g, '<div class="flex items-start gap-2 my-1"><span class="text-blue-500 mt-1">•</span><span>$1</span></div>')
+      .replace(/🔍|💊|🚨|💡|🌡️|📞/g, '<span class="text-lg">$&</span>')
+      .split('\n').map(line => line.trim()).filter(line => line).join('<br />');
+  };
+
   return (
-    <div className={`min-h-screen flex items-center justify-center p-4 transition-colors ${isDarkMode ? 'bg-gray-900' : 'bg-[#2A3D66]'}`}>
-      <div className={`w-full max-w-2xl rounded-lg shadow-lg overflow-hidden ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
-        {/* Header */}
-        <div className={`px-6 py-3 flex justify-between items-center ${isDarkMode ? 'bg-gray-700' : 'bg-[#6F7FB7]'}`}>
-          <h2 className="text-2xl font-bold text-white">Health Assistant</h2>
-          <div className="flex gap-3">
+    <div className={`min-h-screen transition-all duration-300 ${
+      isDarkMode 
+        ? 'bg-gradient-to-br from-gray-900 via-slate-900 to-gray-800' 
+        : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'
+    }`}>
+      
+      {/* Sidebar */}
+      <div className={`fixed left-0 top-0 h-full w-80 transform transition-transform duration-300 z-50 ${
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      } ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-r shadow-2xl`}>
+        
+        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className={`font-bold text-lg ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
+              Chat History
+            </h3>
             <button 
-              onClick={clearChat}
-              className="text-white hover:text-gray-200 transition-colors"
-              title="Clear chat"
+              onClick={() => setSidebarOpen(false)}
+              className={`p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}
             >
-              <RotateCcw size={20} />
-            </button>
-            <button 
-              onClick={() => setIsSpeechEnabled(!isSpeechEnabled)} 
-              className={`text-white transition-colors ${isSpeechEnabled ? 'text-green-400' : ''}`}
-              title={isSpeechEnabled ? "Voice output enabled" : "Voice output disabled"}
-            >
-              <Volume2 size={20} />
-            </button>
-            <button 
-              onClick={() => setIsDarkMode(!isDarkMode)}
-              className="text-white hover:text-gray-200 transition-colors"
-              title={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
-            >
-              <Moon size={20} />
+              <X size={20} />
             </button>
           </div>
+          
+          
         </div>
 
-        {/* Warning banner */}
-        <div className="px-6 py-2 bg-yellow-100 text-yellow-800 text-sm flex items-center gap-2">
-          <AlertTriangle size={16} />
-          <p>For informational purposes only. Always consult healthcare professionals for medical advice.</p>
-        </div>
-
-        {/* Messages section */}
-        <div className="h-96 overflow-y-auto p-6">
-          {messages.map((message, index) => (
-            <div key={index} className={`flex mb-4 ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[75%] rounded-lg px-4 py-2 ${message.type === 'user' ? 'bg-blue-500' : 'bg-gray-200'} ${message.type === 'user' ? 'text-white' : 'text-gray-800'}`}>
-                <div className="text-sm mb-1">{message.sender} • {message.time}</div>
-                <p className="whitespace-pre-wrap">{message.content}</p>
+        <div className="p-4 overflow-y-auto h-full pb-20">
+          {chatHistory.map((chat) => (
+            <div 
+              key={chat.id}
+              onClick={() => loadChat(chat.id)}
+              className={`group flex items-center justify-between p-3 rounded-xl mb-2 cursor-pointer transition-all ${
+                chat.id === currentChatId 
+                  ? 'bg-blue-100 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700' 
+                  : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+              }`}
+            >
+              <div className="flex-1 min-w-0">
+                <p className={`font-medium truncate ${
+                  chat.id === currentChatId 
+                    ? 'text-blue-700 dark:text-blue-300' 
+                    : isDarkMode ? 'text-gray-200' : 'text-gray-800'
+                }`}>
+                  {chat.title}
+                </p>
+                <p className={`text-sm truncate ${
+                  chat.id === currentChatId 
+                    ? 'text-blue-600 dark:text-blue-400' 
+                    : 'text-gray-500'
+                }`}>
+                  {chat.messages.length} messages
+                </p>
               </div>
+             
             </div>
           ))}
-          {isTyping && (
-            <div className="flex items-center gap-2 text-gray-500">
-              <div className="animate-pulse">Typing...</div>
-            </div>
-          )}
-          <div ref={messagesEndRef} />
         </div>
+      </div>
 
-        {/* Updated Input area */}
-        <div className={`p-4 border-t ${isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}>
-          <div className="relative">
-            <div className="flex gap-2">
-              <div className="flex-1 relative">
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={userInput}
-                    onChange={handleInputChange}
-                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage(userInput)}
-                    placeholder="Describe your symptoms or ask a health question..."
-                    className={`w-full px-4 py-2 rounded-lg ${isDarkMode ? 'bg-gray-600 text-white' : 'bg-white'}`}
-                  />
-                  {userInput && (
-                    <button
-                      onClick={() => {
-                        setUserInput('');
-                        setSuggestionsVisible(false);
-                      }}
-                      className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                    >
-                      <X size={16} />
-                    </button>
-                  )}
+      {/* Main Chat Interface */}
+      <div className={`transition-all duration-300 ${sidebarOpen ? 'ml-80' : 'ml-0'}`}>
+        <div className="flex flex-col h-screen max-w-6xl mx-auto">
+          
+          {/* Header */}
+          <div className={`backdrop-blur-xl border-b shadow-lg ${
+            isDarkMode 
+              ? 'bg-gray-800/90 border-gray-700' 
+              : 'bg-white/90 border-gray-200'
+          }`}>
+            <div className="px-6 py-4 flex justify-between items-center">
+              <div className="flex items-center gap-4">
+                <button 
+                  onClick={() => setSidebarOpen(!sidebarOpen)}
+                  className={`p-2 rounded-xl transition-all ${
+                    isDarkMode 
+                      ? 'hover:bg-gray-700 text-gray-300' 
+                      : 'hover:bg-gray-100 text-gray-600'
+                  }`}
+                >
+                  <MessageSquare size={20} />
+                </button>
+                <div>
+                  <h1 className={`text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent`}>
+                    Health Assistant
+                  </h1>
+                  <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                    Powered by AI • Always consult professionals
+                  </p>
                 </div>
-                {suggestionsVisible && suggestions.length > 0 && (
-                  <div className={`absolute w-full mt-1 rounded-lg shadow-lg z-10 ${isDarkMode ? 'bg-gray-700' : 'bg-white'}`}>
-                    {suggestions.map((suggestion, index) => (
-                      <div
-                        key={index}
-                        onClick={() => handleSuggestionClick(suggestion)}
-                        className={`px-4 py-2 cursor-pointer ${
-                          isDarkMode 
-                            ? 'hover:bg-gray-600 text-white' 
-                            : 'hover:bg-gray-100'
-                        }`}
-                      >
-                        {suggestion}
-                      </div>
-                    ))}
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => setIsSpeechEnabled(!isSpeechEnabled)} 
+                  className={`p-2 rounded-xl transition-all ${
+                    isSpeechEnabled 
+                      ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' 
+                      : isDarkMode ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-600'
+                  }`}
+                  title="Voice Output"
+                >
+                  <Volume2 size={20} />
+                </button>
+                
+                <button 
+                  onClick={() => setIsDarkMode(!isDarkMode)} 
+                  className={`p-2 rounded-xl transition-all ${
+                    isDarkMode ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-100 text-gray-600'
+                  }`}
+                  title="Toggle Theme"
+                >
+                  {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Warning Banner */}
+          <div className="mx-6 mt-4 p-3 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200 dark:border-amber-800">
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="text-amber-600 dark:text-amber-400" size={20} />
+              <p className="text-amber-800 dark:text-amber-200 text-sm font-medium">
+                For informational purposes only. Always consult healthcare professionals for medical advice.
+              </p>
+            </div>
+          </div>
+
+          {/* Messages */}
+          <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+            {messages.map((message, index) => (
+              <div key={index} className={`flex gap-4 ${message.type === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
+                
+                {/* Avatar */}
+                <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-lg ${
+                  message.type === 'user' 
+                    ? 'bg-gradient-to-br from-blue-500 to-purple-600' 
+                    : 'bg-gradient-to-br from-green-500 to-blue-600'
+                }`}>
+                  {message.avatar}
+                </div>
+
+                {/* Message Bubble */}
+                <div className={`max-w-2xl ${message.type === 'user' ? 'text-right' : 'text-left'}`}>
+                  <div className={`inline-block p-4 rounded-2xl shadow-lg ${
+                    message.type === 'user'
+                      ? 'bg-gradient-to-br from-blue-500 to-purple-600 text-white'
+                      : isDarkMode 
+                        ? 'bg-gray-800 border border-gray-700 text-gray-100'
+                        : 'bg-white border border-gray-200 text-gray-800'
+                  } ${message.type === 'user' ? 'rounded-tr-md' : 'rounded-tl-md'}`}>
+                    
+                    <div className={`text-xs mb-2 flex items-center gap-2 ${
+                      message.type === 'user' 
+                        ? 'text-blue-100 justify-end' 
+                        : isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                    }`}>
+                      <span className="font-medium">{message.sender}</span>
+                      <span>•</span>
+                      <span>{message.time}</span>
+                    </div>
+                    
+                    <div 
+                      className={`prose max-w-none ${
+                        message.type === 'user' 
+                          ? 'text-white' 
+                          : isDarkMode ? 'prose-invert' : ''
+                      }`}
+                      dangerouslySetInnerHTML={{ 
+                        __html: message.type === 'bot' ? formatMessageContent(message.content) : message.content 
+                      }}
+                    />
                   </div>
+                </div>
+              </div>
+            ))}
+            
+            {/* Typing Indicator */}
+            {isTyping && (
+              <div className="flex gap-4">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center text-lg">
+                  🤖
+                </div>
+                <div className={`p-4 rounded-2xl rounded-tl-md shadow-lg ${
+                  isDarkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'
+                }`}>
+                  <div className="flex items-center gap-2">
+                    <div className="flex gap-1">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{animationDelay: '0ms'}}></div>
+                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{animationDelay: '150ms'}}></div>
+                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{animationDelay: '300ms'}}></div>
+                    </div>
+                    <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                      AI is thinking...
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Input Area */}
+          <div className={`p-6 border-t backdrop-blur-xl ${
+            isDarkMode 
+              ? 'bg-gray-800/90 border-gray-700' 
+              : 'bg-white/90 border-gray-200'
+          }`}>
+            <div className="flex gap-3 items-end max-w-4xl mx-auto">
+              
+              {/* Text Input */}
+              <div className="flex-1 relative">
+                <textarea
+                  value={userInput}
+                  onChange={handleInputChange}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSendMessage(userInput);
+                    }
+                  }}
+                  placeholder="Describe your symptoms or ask a health question..."
+                  className={`w-full px-4 py-3 pr-12 rounded-2xl resize-none max-h-32 min-h-[48px] transition-all ${
+                    isDarkMode 
+                      ? 'bg-gray-700 text-white border border-gray-600 focus:border-blue-500' 
+                      : 'bg-gray-50 text-gray-800 border border-gray-300 focus:border-blue-500'
+                  } focus:outline-none focus:ring-2 focus:ring-blue-500/20`}
+                  rows="1"
+                />
+                
+                {userInput && (
+                  <button 
+                    onClick={() => setUserInput('')}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-500"
+                  >
+                    <X size={16} />
+                  </button>
                 )}
               </div>
+
+              {/* Voice Input Button */}
               <button
                 onClick={toggleVoiceInput}
-                className={`p-2 rounded-lg text-white transition-colors ${
-                  isListening ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'
+                className={`p-3 rounded-2xl transition-all ${
+                  isListening 
+                    ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse' 
+                    : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300'
                 }`}
-                title={isListening ? "Stop voice input" : "Start voice input"}
+                title={isListening ? "Stop listening" : "Start voice input"}
               >
                 {isListening ? <MicOff size={20} /> : <Mic size={20} />}
               </button>
+
+              {/* Send Button */}
               <button
                 onClick={() => handleSendMessage(userInput)}
-                className="p-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white transition-colors"
+                disabled={!userInput.trim()}
+                className={`p-3 rounded-2xl transition-all ${
+                  userInput.trim()
+                    ? 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg' 
+                    : 'bg-gray-200 dark:bg-gray-700 text-gray-400 cursor-not-allowed'
+                }`}
                 title="Send message"
               >
                 <Send size={20} />
@@ -449,6 +437,14 @@ const ChatAnalyzer = () => {
           </div>
         </div>
       </div>
+
+      {/* Sidebar Overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
     </div>
   );
 };
